@@ -1,0 +1,1452 @@
+@charset "UTF-8";
+/* ============================================================================
+   ILKIĆEV KUĆERAK — Vrdnik, Fruška gora
+   Design system: "Podrum" (the cellar) — structural DNA adapted from Auros,
+   re-pigmented from the estate's own materials: lime-wash, moss, oak, brass,
+   and thermal steam.
+
+   Rules inherited from the Auros reference:
+     · rationed colour — achromatic text carries content, chroma is atmosphere
+     · no drop shadows; depth comes from the surface stack + hairline borders
+     · two radii only: 16px surfaces, 6px controls
+     · display type at medium weight with aggressive negative tracking
+     · line-height 1.0-ish above 36px, 1.6-ish for body — the contrast is the rhythm
+     · uppercase tracked eyebrows as the structural label
+
+   Re-theme: every colour and metric is a custom property in :root below.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- 1. TOKENS */
+
+:root {
+  /* --- Surface stack (level 0 → 3) -------------------------------------
+     Names are inherited from the first, darker scheme; the values are now
+     the same estate in daylight. Keep the names, they are referenced ~200
+     times below.                                                          */
+  --podrum:      #EAE3D1;  /* L0 · canvas — the stone path, lifted        */
+  --hlad:        #E0D8C2;  /* L1 · recessed bands, footer — the path       */
+  --mahovina:    #F3EFE3;  /* L2 · raised card surfaces — warm paper       */
+  --kamen:       #DFD6BD;  /* L3 · low-emphasis fills, inputs              */
+  --rub:         #D8CFB6;  /* hairline borders                             */
+  --rub-jak:     #B9AC8C;  /* emphasised borders, focus tracks             */
+
+  /* --- Ink ---------------------------------------------------------------
+     Sampled from the bark and shingle in the same photograph.             */
+  --krec:        #26251C;  /* headings                   (12.0:1 on L0)    */
+  --magla:       #4A4636;  /* body copy         (7.4 on L0, 6.6 on L1)     */
+  --tiho:        #5C5947;  /* captions, meta    (5.5 on L0, 5.0 on L1)     */
+
+  /* --- Rationed chroma -------------------------------------------------- */
+  --mesing:      #7A4E18;  /* cabin wood — the one accent (5.6 / 5.0)      */
+  --mesing-svet: #5C3A10;  /* the same, pressed / emphasised               */
+  --mineral:     #4A5B2A;  /* forest — steam gradient and second accent    */
+  --upozorenje:  #9B3B1E;  /* form errors                                  */
+
+  /* --- Hero ink ---------------------------------------------------------
+     The hero sits on a photograph, so it cannot borrow the page ink.      */
+  --junak-ink:    #F7F3E9;
+  --junak-telo:   #E2E0D0;
+  --junak-tiho:   #C3C2AE;
+  --junak-mesing: #E8C58A;
+
+  /* --- Gradients (atmosphere, never text) ------------------------------- */
+  --para: linear-gradient(180deg, transparent, var(--mesing) 22%, var(--mineral) 78%, transparent);
+  --izvor: radial-gradient(closest-side, rgba(74,91,42,.12), transparent 70%);
+  --sjaj:  radial-gradient(closest-side, rgba(122,78,24,.10), transparent 70%);
+
+  /* --- Type ------------------------------------------------------------- */
+  --serif: "Newsreader", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --grot:  "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --t-display: clamp(2.3rem, 5.4vw, 4.3rem);
+  --t-h1:      clamp(2.45rem, 5.6vw, 4.4rem);
+  --t-h2:      clamp(1.95rem, 3.8vw, 3rem);
+  --t-h3:      clamp(1.3rem, 1.9vw, 1.7rem);
+  --t-h4:      clamp(1.08rem, 1.3vw, 1.22rem);
+  --t-lead:    clamp(1.1rem, 1.5vw, 1.3rem);
+  --t-body:    1.0625rem;   /* 17px — above the 16px mobile floor          */
+  --t-small:   0.9375rem;
+  --t-label:   0.75rem;
+
+  /* --- Space (4px base) -------------------------------------------------- */
+  --s1: 4px;   --s2: 8px;   --s3: 12px;  --s4: 16px;  --s5: 20px;
+  --s6: 24px;  --s8: 32px;  --s10: 40px; --s12: 48px; --s16: 64px;
+  --s20: 80px; --s24: 96px; --s30: 120px; --s40: 160px;
+
+  --sekcija: clamp(72px, 9vw, 132px);   /* vertical rhythm between bands   */
+  --oluk:    clamp(20px, 5vw, 56px);    /* page gutter                     */
+  --sirina:  1440px;                    /* max content width               */
+  --mera:    64ch;                      /* readable measure                */
+
+  /* --- Shape ------------------------------------------------------------ */
+  --r-plocica: 16px;   /* surfaces */
+  --r-kontrola: 6px;   /* controls */
+
+  /* --- Motion ----------------------------------------------------------- */
+  --brzo:  180ms;
+  --srednje: 300ms;
+  --sporo: 720ms;
+  --izlaz: cubic-bezier(.16, 1, .3, 1);      /* enter — decelerate hard    */
+  --ulaz:  cubic-bezier(.7, 0, .84, 0);      /* exit                       */
+  --meko:  cubic-bezier(.34, 1.2, .64, 1);   /* springy press              */
+
+  /* --- Layers ----------------------------------------------------------- */
+  --z-para: 0;  --z-sadrzaj: 10; --z-kicma: 20; --z-zaglavlje: 40; --z-meni: 60;
+}
+
+/* ------------------------------------------------------------ 2. FOUNDATION */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  /* header height + breathing room, so anchor targets clear the fixed bar */
+  scroll-padding-top: 104px;
+}
+
+body {
+  margin: 0;
+  background: var(--podrum);
+  color: var(--magla);
+  font-family: var(--grot);
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.65;
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+img, svg, video { display: block; max-width: 100%; }
+img { height: auto; }
+
+h1, h2, h3, h4 {
+  font-family: var(--serif);
+  color: var(--krec);
+  font-weight: 400;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 { font-size: var(--t-h1);  line-height: 1.0;  letter-spacing: -.035em; }
+h2 { font-size: var(--t-h2);  line-height: 1.06; letter-spacing: -.028em; }
+h3 { font-size: var(--t-h3);  line-height: 1.22; letter-spacing: -.014em; }
+h4 { font-size: var(--t-h4);  line-height: 1.35; letter-spacing: -.008em; font-family: var(--grot); font-weight: 500; color: var(--krec); }
+p  { margin: 0 0 var(--s5); }
+p:last-child { margin-bottom: 0; }
+
+a { color: inherit; }
+ul, ol { margin: 0; padding: 0; }
+
+::selection { background: var(--mesing); color: var(--podrum); }
+
+/* Focus — visible everywhere, never removed. */
+:focus-visible {
+  outline: 2px solid var(--mesing-svet);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.skip {
+  position: absolute; left: var(--s4); top: -100px;
+  z-index: 100;
+  display: inline-flex; align-items: center;
+  min-height: 44px;
+  background: var(--mesing); color: var(--podrum);
+  padding: var(--s3) var(--s5);
+  border-radius: var(--r-kontrola);
+  font: 500 var(--t-small)/1 var(--grot);
+  text-decoration: none;
+  transition: top var(--brzo) var(--izlaz);
+}
+.skip:focus { top: var(--s4); }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---------------------------------------------------------------- 3. LAYOUT */
+
+.omot {                       /* page-width container */
+  width: 100%;
+  max-width: var(--sirina);
+  margin-inline: auto;
+  padding-inline: var(--oluk);
+}
+
+.traka {                      /* a full-width band */
+  padding-block: var(--sekcija);
+  position: relative;
+}
+.traka--uvucena { background: var(--hlad); }
+.traka--tesna   { padding-block: calc(var(--sekcija) * .62); }
+
+.stub  { max-width: var(--mera); }
+.stub--sredina { margin-inline: auto; text-align: center; }
+
+/* Asymmetric feature grid — Auros's two-column signature */
+.par {
+  display: grid;
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .par { grid-template-columns: 1fr 1fr; }
+  .par--tekst-desno > *:first-child { order: 2; }
+  .par--sirok-levo  { grid-template-columns: 1.15fr .85fr; }
+  .par--sirok-desno { grid-template-columns: .85fr 1.15fr; }
+}
+
+.resetka {
+  display: grid;
+  gap: var(--s6);
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+}
+.resetka--3 { grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); }
+.resetka--tesna { gap: var(--s4); }
+/* For cards that carry a heading and nothing else, so a row of them stays a
+   row instead of breaking to a second line with a single card on it. */
+.resetka--kratka { grid-template-columns: repeat(auto-fit, minmax(min(196px, 100%), 1fr)); }
+
+.slaganje > * + * { margin-top: var(--s5); }
+.slaganje--siroko > * + * { margin-top: var(--s8); }
+
+/* ------------------------------------------------------------ 4. TYPOGRAPHY */
+
+.natpis {                     /* eyebrow / structural label */
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  font-family: var(--grot);
+  font-size: var(--t-label);
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--tiho);
+  margin: 0 0 var(--s5);
+}
+.natpis::before {
+  content: "";
+  width: 28px; height: 1px;
+  background: var(--mesing);
+  flex: none;
+}
+.stub--sredina .natpis { justify-content: center; }
+
+.uvod {                       /* lead paragraph */
+  font-size: var(--t-lead);
+  line-height: 1.55;
+  color: var(--magla);
+}
+
+.krupno {
+  font-family: var(--serif);
+  font-size: var(--t-display);
+  line-height: .94;
+  letter-spacing: -.045em;
+  font-weight: 400;
+  color: var(--krec);
+  margin: 0;
+}
+.krupno em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--mesing-svet);
+}
+
+.citat {
+  font-family: var(--serif);
+  font-size: clamp(1.5rem, 3vw, 2.35rem);
+  line-height: 1.28;
+  letter-spacing: -.02em;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--krec);
+  margin: 0;
+}
+.citat-izvor {
+  margin-top: var(--s6);
+  font-size: var(--t-label);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--tiho);
+}
+
+.meta {
+  font-size: var(--t-small);
+  color: var(--tiho);
+}
+
+/* Inline link with a wiping underline */
+.veza {
+  color: var(--krec);
+  text-decoration: none;
+  background-image: linear-gradient(var(--mesing), var(--mesing));
+  background-size: 0 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size var(--srednje) var(--izlaz), color var(--brzo) linear;
+}
+.veza:hover, .veza:focus-visible { background-size: 100% 1px; color: var(--mesing-svet); }
+
+/* --------------------------------------------------------------- 5. BUTTONS */
+
+.dugme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s3);
+  min-height: 48px;                    /* ≥44px touch target */
+  padding: var(--s4) var(--s8);
+  border: 1px solid transparent;
+  border-radius: var(--r-kontrola);
+  font-family: var(--grot);
+  font-size: var(--t-small);
+  font-weight: 500;
+  letter-spacing: .04em;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--brzo) var(--meko),
+              background-color var(--srednje) var(--izlaz),
+              border-color var(--srednje) var(--izlaz),
+              color var(--srednje) var(--izlaz);
+}
+.dugme > * { position: relative; z-index: 1; }
+.dugme:active { transform: scale(.975); }
+
+/* Primary — the one signature control. Brass sweep on hover. */
+.dugme--glavno {
+  background: var(--mesing);
+  color: #FBF7EC;
+}
+.dugme--glavno::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.42) 50%, transparent 80%);
+  transform: translateX(-130%);
+  transition: transform 900ms var(--izlaz);
+}
+.dugme--glavno:hover::after, .dugme--glavno:focus-visible::after { transform: translateX(130%); }
+.dugme--glavno:hover { background: var(--mesing-svet); }
+
+.dugme--tiho {
+  background: transparent;
+  color: var(--krec);
+  border-color: var(--rub-jak);
+}
+.dugme--tiho:hover { border-color: var(--mesing); color: var(--mesing-svet); }
+
+.dugme--puno { width: 100%; }
+
+.dugme .strelica { transition: transform var(--srednje) var(--izlaz); }
+.dugme:hover .strelica { transform: translateX(4px); }
+
+/* Small square arrow control — Auros component, kept verbatim in spirit */
+.strelica-dugme {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: var(--r-kontrola);
+  background: rgba(122,78,24,.10);
+  border: 1px solid var(--rub);
+  color: var(--mesing);
+  flex: none;
+  transition: background-color var(--srednje) var(--izlaz), border-color var(--srednje) var(--izlaz);
+}
+
+.grupa-dugmadi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s4);
+}
+
+/* ---------------------------------------------------------------- 6. HEADER */
+
+.zaglavlje {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: var(--z-zaglavlje);
+  background: rgba(234, 227, 209, .88);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  backdrop-filter: blur(14px) saturate(130%);
+  border-bottom: 1px solid transparent;
+  transition: background-color var(--srednje) var(--izlaz),
+              border-color var(--srednje) var(--izlaz);
+}
+.zaglavlje.zalepljen {
+  background: rgba(234, 227, 209, .95);
+  border-bottom-color: var(--rub);
+}
+
+.zaglavlje-red {
+  display: flex;
+  align-items: center;
+  gap: var(--s6);
+  min-height: 82px;
+}
+
+/* Logo — SWAP POINT. Replace the <img src> in every page (generated from one
+   template, so change it in _build/generate.py and re-run). */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  min-height: 44px;
+  text-decoration: none;
+  flex: none;
+  margin-right: auto;
+}
+.logo img { width: 38px; height: 38px; }
+.logo-tekst {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+.logo-ime {
+  font-family: var(--serif);
+  font-size: 1.12rem;
+  letter-spacing: -.02em;
+  color: var(--krec);
+}
+.logo-mesto {
+  font-size: 10px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--tiho);
+  margin-top: 4px;
+}
+
+.navigacija { display: none; }
+@media (min-width: 1060px) { .navigacija { display: block; } }
+
+.nav-lista {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  list-style: none;
+}
+.nav-stavka { position: relative; }
+
+.nav-veza {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-kontrola);
+  font-size: var(--t-label);
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--magla);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--brzo) linear;
+}
+.nav-veza::after {                 /* active underline — themable */
+  content: "";
+  position: absolute;
+  left: var(--s4); right: var(--s4);
+  bottom: 2px;
+  height: 1px;
+  background: var(--mesing);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--srednje) var(--izlaz);
+}
+.nav-veza:hover { color: var(--krec); }
+.nav-veza:hover::after { transform: scaleX(1); }
+.nav-stavka.aktivan > .nav-veza { color: var(--krec); }
+.nav-stavka.aktivan > .nav-veza::after { transform: scaleX(1); }
+
+.nav-kapa { transition: transform var(--srednje) var(--izlaz); }
+.nav-stavka.otvoren .nav-kapa { transform: rotate(180deg); }
+
+/* Dropdown — real links to real pages */
+.podmeni {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  min-width: 244px;
+  list-style: none;
+  padding: var(--s2);
+  background: var(--mahovina);
+  border: 1px solid var(--rub);
+  border-radius: var(--r-plocica);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity var(--srednje) var(--izlaz),
+              transform var(--srednje) var(--izlaz),
+              visibility 0s linear var(--srednje);
+}
+.nav-stavka.otvoren .podmeni {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 0s;
+}
+.podmeni-veza {
+  display: block;
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-kontrola);
+  font-size: var(--t-small);
+  color: var(--magla);
+  text-decoration: none;
+  transition: background-color var(--brzo) linear, color var(--brzo) linear;
+}
+.podmeni-veza:hover { background: var(--kamen); color: var(--krec); }
+.podmeni li.aktivan > .podmeni-veza { color: var(--mesing); background: rgba(122,78,24,.08); }
+
+/* Language switcher */
+.jezici {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--rub);
+  border-radius: var(--r-kontrola);
+  flex: none;
+}
+.jezik {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-decoration: none;
+  color: var(--tiho);
+  transition: color var(--brzo) linear, background-color var(--brzo) linear;
+}
+/* On touch, the compact desktop sizing is not enough to hit reliably. */
+@media (pointer: coarse) {
+  .jezik { min-width: 44px; min-height: 44px; }
+}
+.jezik:hover { color: var(--krec); }
+.jezik[aria-current="true"] { background: var(--kamen); color: var(--mesing); }
+
+.zaglavlje .dugme { display: none; }
+@media (min-width: 1240px) { .zaglavlje .dugme { display: inline-flex; } }
+
+/* On a phone the row is logo + language chips + burger, which together exceed
+   the viewport and push the burger off-screen — where body overflow-x hides it
+   rather than scrolling to it, leaving no way to open the menu. Below this
+   width the chips move into the drawer and the wordmark tightens. */
+@media (max-width: 599px) {
+  .zaglavlje-red { gap: var(--s3); min-height: 72px; }
+  .zaglavlje .jezici { display: none; }
+  .logo img { width: 32px; height: 32px; }
+  .logo-ime { font-size: .98rem; }
+  .logo-mesto { font-size: 9px; letter-spacing: .16em; }
+}
+
+/* Burger */
+.burger {
+  width: 46px; height: 46px;
+  display: grid; place-items: center;
+  background: transparent;
+  border: 1px solid var(--rub);
+  border-radius: var(--r-kontrola);
+  cursor: pointer;
+  flex: none;
+}
+@media (min-width: 1060px) { .burger { display: none; } }
+.burger span {
+  display: block;
+  width: 18px; height: 1.5px;
+  background: var(--krec);
+  transition: transform var(--srednje) var(--izlaz), opacity var(--brzo) linear;
+}
+.burger span + span { margin-top: 5px; }
+.burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+/* Mobile drawer */
+.fioka {
+  position: fixed;
+  inset: 82px 0 0;
+  z-index: var(--z-meni);
+  background: var(--podrum);
+  border-top: 1px solid var(--rub);
+  padding: var(--s8) var(--oluk) var(--s16);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-12px);
+  transition: opacity var(--srednje) var(--izlaz),
+              transform var(--srednje) var(--izlaz),
+              visibility 0s linear var(--srednje);
+}
+.fioka.otvoren {
+  opacity: 1; visibility: visible; transform: translateY(0);
+  transition-delay: 0s;
+}
+@media (min-width: 1060px) { .fioka { display: none; } }
+.fioka ul { list-style: none; }
+.fioka-veza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  padding: var(--s3) 0;
+  border-bottom: 1px solid var(--rub);
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  letter-spacing: -.02em;
+  color: var(--krec);
+  text-decoration: none;
+}
+.fioka li.aktivan > .fioka-veza { color: var(--mesing); }
+.fioka-pod {
+  padding-left: var(--s5);
+  border-left: 1px solid var(--rub);
+  margin: var(--s3) 0 var(--s5);
+}
+.fioka-pod a {
+  display: block;
+  min-height: 44px;
+  padding: var(--s3) 0;
+  font-size: var(--t-small);
+  color: var(--magla);
+  text-decoration: none;
+}
+.fioka-pod li.aktivan > a { color: var(--mesing); }
+
+/* Language switcher inside the drawer — the only place it lives on a phone.
+   It sits at the top: the drawer scrolls, and a switcher parked under the fold
+   on a trilingual site is a switcher nobody finds. */
+.fioka-jezici { margin: 0 0 var(--s6); }
+.fioka-jezici .natpis { margin-bottom: var(--s3); }
+.fioka-jezici .jezici { display: inline-flex; }
+.fioka-jezici .jezik { min-width: 56px; min-height: 48px; font-size: 12px; }
+
+/* The drawer hangs off the header, so its offset has to match the header's
+   height at this width. Declared here, after the base rule, or the shorthand
+   above wins the cascade regardless of the media query. */
+@media (max-width: 599px) {
+  .fioka { top: 72px; }
+}
+
+/* ------------------------------------------------- 7. THE SIGNATURE: STEAM SPINE
+   A scroll-driven data spine. It is not decoration: every tick carries a real,
+   sourced number about the estate, and lights when its section is in view.
+   Desktop: a fixed rail on the left. Mobile: a 2px progress bar under the header.
+   ------------------------------------------------------------------------- */
+
+.kicma {
+  position: fixed;
+  left: 26px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: var(--z-kicma);
+  display: none;
+  pointer-events: none;
+}
+@media (min-width: 1240px) { .kicma { display: block; } }
+
+.kicma-sina {
+  position: relative;
+  width: 1px;
+  height: 46vh;
+  background: var(--rub-jak);
+}
+.kicma-tok {                        /* --napredak: 0 → 1, written by JS */
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 1px;
+  background: var(--para);
+  transform-origin: top;
+  transform: scaleY(var(--napredak, 0));
+  transition: transform 120ms linear;
+}
+.kicma-tacka {
+  position: absolute;
+  left: -3.5px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--podrum);
+  border: 1px solid var(--rub-jak);
+  transition: background-color var(--srednje) var(--izlaz),
+              border-color var(--srednje) var(--izlaz),
+              transform var(--srednje) var(--meko);
+}
+.kicma-tacka::after {               /* the datum, revealed on activation */
+  content: attr(data-podatak);
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%) translateX(-6px);
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--tiho);
+  opacity: 0;
+  transition: opacity var(--srednje) var(--izlaz), transform var(--srednje) var(--izlaz);
+}
+.kicma-tacka.zapaljen {
+  background: var(--mesing);
+  border-color: var(--mesing);
+  transform: scale(1.35);
+}
+
+/* The rail is fixed to the viewport edge while content is centred, so the
+   datum labels only have room once the centred container leaves a wide enough
+   margin. Below that the rail still runs — dots and fill only, no labels —
+   rather than printing text over the copy. */
+@media (min-width: 1600px) {
+  .kicma-tacka.zapaljen::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+    color: var(--mesing-svet);
+  }
+}
+
+.kicma-mobilna {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  z-index: var(--z-zaglavlje);
+  background: transparent;
+  pointer-events: none;
+}
+.kicma-mobilna i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--mesing), var(--mineral));
+  transform-origin: left;
+  transform: scaleX(var(--napredak, 0));
+  transition: transform 120ms linear;
+}
+@media (min-width: 1240px) { .kicma-mobilna { display: none; } }
+
+/* -------------------------------------------------------- 8. AMBIENT STEAM */
+
+.para-polje {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-para);
+  overflow: hidden;
+  pointer-events: none;
+}
+.para-polje b {
+  position: absolute;
+  display: block;
+  width: 60vmax; height: 60vmax;
+  border-radius: 50%;
+  will-change: transform;
+}
+.para-polje b:nth-child(1) { background: var(--izvor); top: -18%; left: -14%; animation: lebdi-a 46s ease-in-out infinite; }
+.para-polje b:nth-child(2) { background: var(--sjaj);  bottom: -26%; right: -18%; animation: lebdi-b 58s ease-in-out infinite; }
+.para-polje b:nth-child(3) { background: var(--izvor); top: 34%; right: 8%; opacity: .55; animation: lebdi-c 52s ease-in-out infinite; }
+
+@keyframes lebdi-a {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); }
+  50%      { transform: translate3d(6vw, 4vh, 0) scale(1.12); }
+}
+@keyframes lebdi-b {
+  0%, 100% { transform: translate3d(0,0,0) scale(1.06); }
+  50%      { transform: translate3d(-7vw, -5vh, 0) scale(1); }
+}
+@keyframes lebdi-c {
+  0%, 100% { transform: translate3d(0,0,0) scale(.94); }
+  50%      { transform: translate3d(-4vw, 6vh, 0) scale(1.1); }
+}
+
+/* ------------------------------------------------------------------ 9. HERO */
+
+.junak {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 86vh;
+  min-height: min(92dvh, 960px);
+  padding-top: calc(82px + var(--s12));
+  /* Must stay larger than the pillar band's negative margin below, or the
+     cards ride up over the hero's buttons. */
+  padding-bottom: clamp(116px, 13vw, 180px);
+  overflow: hidden;
+}
+.junak-omot { position: relative; z-index: var(--z-sadrzaj); width: 100%; }
+
+/* The photograph sits behind the words rather than under them. Everything the
+   type needs to stay legible is done by the scrim below — the image itself is
+   never dimmed globally, so it still reads as a photograph on the right. */
+.junak-pozadina {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+.junak-slika { width: 100%; height: 100%; margin: 0; }
+.junak-slika picture { display: block; width: 100%; height: 100%; }
+.junak-pozadina img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 58% 50%;
+}
+.junak-pozadina::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Horizontal: heavy where the type sits, releasing toward the lit arches.
+     Vertical: clears the header and lands the section on the page canvas. */
+  background:
+    linear-gradient(100deg,
+      rgba(20, 28, 22, .90) 0%,
+      rgba(20, 28, 22, .82) 38%,
+      rgba(20, 28, 22, .46) 68%,
+      rgba(20, 28, 22, .26) 100%),
+    linear-gradient(to bottom,
+      rgba(20, 28, 22, .34) 0%,
+      rgba(20, 28, 22, .12) 26%,
+      rgba(20, 28, 22, .30) 68%,
+      var(--podrum) 100%);
+}
+/* Narrow screens put the type across the full width, so the horizontal
+   release has nowhere to go — flatten it and lean on the vertical scrim. */
+@media (max-width: 899px) {
+  .junak-pozadina img { object-position: 62% 50%; }
+  .junak-pozadina::after {
+    background:
+      linear-gradient(180deg,
+        rgba(20, 28, 22, .88) 0%,
+        rgba(20, 28, 22, .76) 30%,
+        rgba(20, 28, 22, .84) 58%,
+        var(--podrum) 100%);
+  }
+}
+
+/* Over a photograph the eyebrow must not stretch the full container — it would
+   drag its hit area and any future background across the lit half of the image.
+   It also carries more weight here than on flat canvas: --tiho is tuned for a
+   solid surface and drops below AA once a photograph is behind it. */
+.junak-omot .natpis {
+  width: fit-content;
+  color: var(--junak-tiho);
+}
+.junak-omot .natpis::before { background: var(--junak-mesing); }
+.junak-omot h1 { color: var(--junak-ink); }
+.junak-omot h1 em { color: var(--junak-mesing); }
+.junak-uvod { color: var(--junak-telo); }
+.junak-omot .dugme--tiho {
+  color: var(--junak-ink);
+  border-color: rgba(255, 255, 255, .38);
+}
+.junak-omot .dugme--tiho:hover {
+  color: var(--junak-mesing);
+  border-color: var(--junak-mesing);
+}
+
+/* Wide enough that each authored line stays on one line, narrow enough that the
+   type never reaches the lit half of the photograph where contrast falls off. */
+.junak-naslov { max-width: 22ch; }
+
+.junak-uvod {
+  max-width: 44ch;
+  margin-top: var(--s6);
+  font-size: var(--t-lead);
+  line-height: 1.55;
+}
+
+.junak-akcije { margin-top: var(--s8); }
+
+/* Three-pillar band — Stay / Celebrate / Dine. Lifted so the cards overlap the
+   foot of the photograph and tie the two sections together. */
+.stubovi-traka {
+  position: relative;
+  z-index: var(--z-sadrzaj);
+  /* Always shallower than the hero's bottom padding above, so the overlap
+     eats into the photograph and never into the copy. */
+  margin-top: clamp(-84px, -6vw, -44px);
+  padding-bottom: var(--sekcija);
+}
+.stubovi {
+  display: grid;
+  gap: 1px;
+  background: var(--rub);
+  border: 1px solid var(--rub);
+  border-radius: var(--r-plocica);
+  overflow: hidden;
+}
+@media (min-width: 820px) { .stubovi { grid-template-columns: repeat(3, 1fr); } }
+
+.stub-kartica {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+  padding: clamp(24px, 3vw, 40px);
+  background: var(--mahovina);
+  text-decoration: none;
+  min-height: 100%;
+  transition: background-color var(--srednje) var(--izlaz);
+}
+.stub-kartica:hover { background: var(--kamen); }
+.stub-kartica-vrh {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s4);
+}
+/* Sits directly under the page h1, so it is an h2 semantically and sized as an
+   h3 visually — the heading level follows the document, not the type scale. */
+.stub-kartica h2 {
+  font-size: var(--t-h3);
+  line-height: 1.22;
+  letter-spacing: -.014em;
+  color: var(--krec);
+}
+.stub-kartica p { color: var(--magla); font-size: var(--t-small); margin: 0; }
+.stub-kartica:hover .strelica-dugme { background: var(--mesing); color: #FBF7EC; border-color: var(--mesing); }
+
+/* ------------------------------------------------------- 10. FIGURES / MEDIA */
+
+.okvir {                      /* image frame with contained hover scale */
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-plocica);
+  border: 1px solid var(--rub);
+  background: var(--mahovina);
+}
+.okvir img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 900ms var(--izlaz);
+}
+.okvir--16x9 { aspect-ratio: 16 / 9; }
+.okvir--3x2  { aspect-ratio: 3 / 2; }
+.okvir--4x5  { aspect-ratio: 4 / 5; }
+.okvir--1x1  { aspect-ratio: 1 / 1; }
+a.okvir:hover img, .kartica:hover .okvir img { transform: scale(1.045); }
+
+/* Video sits in the same frame as a photograph: one radius, one hairline,
+   no shadow. The poster carries the first frame so the box is never empty. */
+.snimak video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--kamen);
+}
+
+figure { margin: 0; }
+figcaption {
+  margin-top: var(--s3);
+  font-size: var(--t-small);
+  color: var(--tiho);
+}
+
+/* ----------------------------------------------------------- 11. STAT BAND */
+
+.brojevi {
+  display: grid;
+  gap: var(--s8) var(--s6);
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+}
+.broj-vrednost {
+  font-family: var(--serif);
+  font-size: clamp(2.6rem, 5vw, 4.1rem);
+  line-height: 1;
+  letter-spacing: -.04em;
+  color: var(--mesing-svet);
+  font-variant-numeric: tabular-nums;
+}
+.broj-vrednost small {
+  font-size: .42em;
+  letter-spacing: -.01em;
+  margin-left: 2px;
+  color: var(--mesing);
+}
+.broj-oznaka {
+  margin-top: var(--s3);
+  font-size: var(--t-label);
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--tiho);
+}
+
+/* ------------------------------------------------------- 11b. ICON ROW
+
+   Five marks under the hero. The ring is a hairline, not a fill, so the row
+   reads as engraving rather than as buttons, and nothing here casts a shadow.
+   The mark alone is decoration, so every one carries its consequence in text
+   underneath and the svg itself is hidden from the accessibility tree.        */
+
+.odlike {
+  display: grid;
+  gap: var(--s10) var(--s6);
+  grid-template-columns: repeat(auto-fit, minmax(min(154px, 100%), 1fr));
+  list-style: none;
+}
+.odlika {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--s2);
+}
+.odlika-znak {
+  width: clamp(72px, 7vw, 88px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  margin-bottom: var(--s4);
+  border: 1px solid var(--rub-jak);
+  border-radius: 50%;
+  color: var(--mesing);
+  transition: border-color var(--srednje) var(--izlaz),
+              transform var(--srednje) var(--izlaz);
+}
+.odlika-znak svg {
+  width: 48%;
+  height: 48%;
+  overflow: visible;
+}
+.odlika:hover .odlika-znak {
+  border-color: var(--mesing);
+  transform: translateY(-2px);
+}
+.odlika-ime {
+  font-family: var(--serif);
+  font-size: clamp(1.02rem, 1.5vw, 1.16rem);
+  line-height: 1.25;
+  letter-spacing: -.015em;
+  color: var(--krec);
+  text-wrap: balance;
+}
+.odlika-opis {
+  font-size: var(--t-small);
+  line-height: 1.5;
+  color: var(--tiho);
+  max-width: 24ch;
+  text-wrap: pretty;
+}
+
+/* -------------------------------------------------------------- 12. CARDS */
+
+.kartica {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+  padding: clamp(24px, 2.6vw, 36px);
+  background: var(--mahovina);
+  border: 1px solid var(--rub);
+  border-radius: var(--r-plocica);
+  text-decoration: none;
+  transition: border-color var(--srednje) var(--izlaz), background-color var(--srednje) var(--izlaz);
+}
+.kartica:hover { border-color: var(--rub-jak); }
+.kartica p { color: var(--magla); margin: 0; font-size: var(--t-small); }
+.kartica--naslov { justify-content: center; padding-block: clamp(28px, 3vw, 40px); }
+.kartica--gola { background: transparent; border-color: transparent; padding: 0; }
+.kartica--gola:hover { border-color: transparent; }
+
+.kartica-broj {
+  font-family: var(--serif);
+  font-size: var(--t-small);
+  color: var(--mesing);
+  letter-spacing: .04em;
+}
+
+/* Feature row — icon-free, label + body + arrow */
+.red-osobine {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s5);
+  padding: var(--s6) 0;
+  border-top: 1px solid var(--rub);
+}
+.red-osobine:last-child { border-bottom: 1px solid var(--rub); }
+.red-osobine dt {
+  flex: none;
+  width: min(210px, 38%);
+  font-weight: 500;
+  color: var(--krec);
+  font-size: var(--t-small);
+}
+.red-osobine dd { margin: 0; font-size: var(--t-small); }
+
+/* Amenity chips */
+.oznake { display: flex; flex-wrap: wrap; gap: var(--s2); list-style: none; }
+.oznake li {
+  padding: 7px var(--s4);
+  border: 1px solid var(--rub);
+  border-radius: var(--r-kontrola);
+  font-size: 13px;
+  color: var(--magla);
+  background: rgba(255,252,244,.42);
+}
+
+/* ---------------------------------------------------------------- 13. MENU */
+
+.jelovnik { list-style: none; }
+.jelovnik li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s4);
+  padding: var(--s5) 0;
+  border-bottom: 1px solid var(--rub);
+}
+.jelovnik li:first-child { border-top: 1px solid var(--rub); }
+.jelo-ime { color: var(--krec); font-weight: 500; font-size: var(--t-body); flex: none; }
+.jelo-crta {
+  flex: 1;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--rub) 0 3px, transparent 3px 7px);
+  transform: translateY(-3px);
+}
+.jelo-opis {
+  flex-basis: 100%;
+  order: 3;
+  font-size: var(--t-small);
+  color: var(--tiho);
+  margin-top: 2px;
+}
+.jelo-cena { color: var(--mesing); font-size: var(--t-small); font-variant-numeric: tabular-nums; flex: none; }
+
+/* --------------------------------------------------------------- 14. FORMS */
+
+.obrazac { display: grid; gap: var(--s5); }
+@media (min-width: 700px) { .obrazac { grid-template-columns: 1fr 1fr; } .polje--puno { grid-column: 1 / -1; } }
+
+.polje { display: flex; flex-direction: column; gap: var(--s2); }
+.polje label {
+  font-size: var(--t-label);
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--magla);
+}
+.polje label .obavezno { color: var(--mesing); margin-left: 3px; }
+
+.polje input, .polje textarea, .polje select {
+  min-height: 52px;                    /* ≥44px touch */
+  padding: var(--s4);
+  background: var(--kamen);
+  border: 1px solid var(--rub);
+  border-radius: var(--r-kontrola);
+  color: var(--krec);
+  font-family: var(--grot);
+  font-size: 16px;                     /* prevents iOS zoom-on-focus */
+  transition: border-color var(--brzo) linear, background-color var(--brzo) linear;
+}
+.polje textarea { min-height: 148px; resize: vertical; line-height: 1.6; }
+.polje select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--magla) 50%), linear-gradient(135deg, var(--magla) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 23px, calc(100% - 15px) 23px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+.polje input::placeholder, .polje textarea::placeholder { color: #8A8571; }
+.polje input:hover, .polje textarea:hover, .polje select:hover { border-color: var(--rub-jak); }
+
+.pomoc { font-size: 13px; color: var(--tiho); }
+
+.greska {
+  font-size: 13px;
+  color: var(--upozorenje);
+  min-height: 0;
+  display: none;
+}
+.polje.nevalidno input, .polje.nevalidno textarea, .polje.nevalidno select { border-color: var(--upozorenje); }
+.polje.nevalidno .greska { display: block; }
+
+.status-poruke {
+  padding: var(--s5);
+  border-radius: var(--r-kontrola);
+  border: 1px solid var(--rub);
+  background: var(--kamen);
+  font-size: var(--t-small);
+}
+.status-poruke[hidden] { display: none; }
+.status-poruke.uspeh { border-color: var(--mesing); color: var(--krec); }
+.status-poruke.neuspeh { border-color: var(--upozorenje); color: var(--krec); }
+
+/* -------------------------------------------------------- 15. CONTACT LIST */
+
+.kontakt-lista { list-style: none; }
+.kontakt-lista li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s5) 0;
+  border-bottom: 1px solid var(--rub);
+}
+.kontakt-lista li:first-child { border-top: 1px solid var(--rub); }
+.kontakt-oznaka {
+  font-size: var(--t-label);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--tiho);
+}
+.kontakt-vrednost { color: var(--krec); font-size: var(--t-body); text-decoration: none; }
+a.kontakt-vrednost:hover { color: var(--mesing-svet); }
+
+.karta-okvir {
+  border-radius: var(--r-plocica);
+  overflow: hidden;
+  border: 1px solid var(--rub);
+  aspect-ratio: 4 / 3;
+  background: var(--mahovina);
+}
+.karta-okvir iframe { width: 100%; height: 100%; border: 0; }
+
+/* --------------------------------------------------------- 16. BREADCRUMBS */
+
+.mrvice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2);
+  list-style: none;
+  font-size: var(--t-label);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tiho);
+  margin-bottom: var(--s6);
+}
+.mrvice a { color: var(--tiho); text-decoration: none; transition: color var(--brzo) linear; }
+.mrvice a:hover { color: var(--mesing); }
+.mrvice li + li::before { content: "/"; margin-right: var(--s2); color: var(--rub-jak); }
+.mrvice [aria-current="page"] { color: var(--magla); }
+
+/* --------------------------------------------------------- 17. PAGE HEADER */
+
+.zaglavlje-strane {
+  position: relative;
+  padding-top: calc(82px + clamp(48px, 6vw, 84px));
+  padding-bottom: clamp(48px, 6vw, 84px);
+  border-bottom: 1px solid var(--rub);
+  overflow: hidden;
+}
+.zaglavlje-strane .omot { position: relative; z-index: var(--z-sadrzaj); }
+.zaglavlje-strane h1 { max-width: 18ch; }
+.zaglavlje-strane .uvod { max-width: 54ch; margin-top: var(--s6); }
+
+/* ---------------------------------------------------------------- 18. CTA */
+
+.poziv {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-plocica);
+  border: 1px solid var(--rub);
+  background: var(--hlad);
+  padding: clamp(40px, 6vw, 96px) clamp(24px, 5vw, 72px);
+  text-align: center;
+}
+.poziv .omot-uzi { position: relative; z-index: var(--z-sadrzaj); max-width: 58ch; margin-inline: auto; }
+.poziv h2 { margin-bottom: var(--s6); }
+.poziv .grupa-dugmadi { justify-content: center; margin-top: var(--s8); }
+
+/* ---------------------------------------------------------------- 19. FOOT */
+
+.podnozje {
+  background: var(--hlad);
+  border-top: 1px solid var(--rub);
+  padding-block: clamp(56px, 7vw, 104px) var(--s10);
+}
+.podnozje-resetka {
+  display: grid;
+  gap: var(--s12) var(--s8);
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+}
+@media (min-width: 900px) { .podnozje-resetka { grid-template-columns: 1.6fr 1fr 1fr 1.2fr; } }
+
+.podnozje h2 {
+  font-family: var(--grot);
+  font-size: var(--t-label);
+  line-height: 1.4;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--tiho);
+  font-weight: 500;
+  margin-bottom: var(--s4);
+}
+.podnozje ul { list-style: none; }
+.podnozje a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;              /* dense link lists still need a real tap area */
+  color: var(--magla);
+  text-decoration: none;
+  font-size: var(--t-small);
+  transition: color var(--brzo) linear;
+}
+.podnozje a:hover { color: var(--mesing-svet); }
+
+.podnozje-dno {
+  margin-top: var(--s16);
+  padding-top: var(--s6);
+  border-top: 1px solid var(--rub);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s4) var(--s8);
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--tiho);
+}
+
+.drustvene { display: flex; gap: var(--s2); list-style: none; }
+.drustvene a {
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border: 1px solid var(--rub);
+  border-radius: var(--r-kontrola);
+  color: var(--magla);
+  transition: border-color var(--srednje) var(--izlaz), color var(--srednje) var(--izlaz);
+}
+.drustvene a:hover { border-color: var(--mesing); color: var(--mesing); }
+
+/* ------------------------------------------------------------- 20. GALLERY */
+
+.galerija {
+  display: grid;
+  gap: var(--s4);
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+}
+@media (min-width: 900px) {
+  .galerija { grid-template-columns: repeat(6, 1fr); grid-auto-rows: 200px; }
+  .galerija > *      { grid-column: span 2; grid-row: span 1; }
+  .galerija > *:nth-child(6n + 1) { grid-column: span 4; grid-row: span 2; }
+  .galerija > *:nth-child(6n + 4) { grid-row: span 2; }
+}
+.galerija .okvir { height: 100%; aspect-ratio: auto; min-height: 200px; }
+
+/* ------------------------------------------------------- 21. LIGHTBOX */
+
+.svetlo {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--s4);
+  padding: clamp(16px, 4vw, 48px);
+  background: rgba(16, 20, 17, .94);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.svetlo[hidden] { display: none; }
+.svetlo img {
+  grid-column: 2;
+  max-width: 100%;
+  max-height: 86vh;
+  margin-inline: auto;
+  border-radius: var(--r-plocica);
+  object-fit: contain;
+}
+.svetlo button {
+  width: 52px; height: 52px;
+  display: grid; place-items: center;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .28);
+  border-radius: var(--r-kontrola);
+  color: #F7F4EC;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--brzo) linear, border-color var(--brzo) linear;
+}
+.svetlo button:hover { background: rgba(255, 255, 255, .11); border-color: var(--mesing); }
+.svetlo-zatvori {
+  position: absolute;
+  top: clamp(16px, 3vw, 32px);
+  right: clamp(16px, 3vw, 32px);
+}
+
+/* ------------------------------------------------------------- 22. MOTION */
+
+/* Reveals only engage once JS confirms it is running, so a JS failure can
+   never leave the page blank. */
+.js .otkrij {
+  opacity: 0;
+  transform: translate3d(0, 26px, 0);
+  transition: opacity var(--sporo) var(--izlaz), transform var(--sporo) var(--izlaz);
+  transition-delay: calc(var(--i, 0) * 70ms);
+  will-change: opacity, transform;
+}
+.js .otkrij.unutra {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
+}
+
+/* Hero line reveal — mask-slide per line */
+.js .linija { display: block; overflow: hidden; }
+.js .linija > span {
+  display: block;
+  transform: translate3d(0, 105%, 0);
+  transition: transform 1100ms var(--izlaz);
+  transition-delay: calc(var(--i, 0) * 95ms + 120ms);
+}
+.js .ucitano .linija > span { transform: translate3d(0, 0, 0); }
+
+/* Hero arrival — the photograph and the words resolve together, the picture
+   taking slightly longer so the type lands first and the image settles under
+   it rather than racing it. */
+.js .junak-pozadina {
+  opacity: 0;
+  transform: scale(1.07);
+  transition: opacity 1600ms var(--izlaz), transform 2600ms var(--izlaz);
+}
+.js .ucitano .junak-pozadina {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Everything else in the hero that is not a headline line. */
+.js .pojava {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  transition: opacity 1000ms var(--izlaz), transform 1000ms var(--izlaz);
+  transition-delay: calc(var(--d, 0) * 1ms);
+}
+.js .ucitano .pojava {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* The full stop: honour the user's system setting. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .js .otkrij { opacity: 1; transform: none; }
+  .js .linija > span { transform: none; }
+  .js .pojava { opacity: 1; transform: none; }
+  .js .junak-pozadina { opacity: 1; transform: none; }
+  .para-polje { display: none; }
+  /* The spine keeps working — it reports position, which is information, not
+     decoration. It simply stops easing between states. */
+  .kicma-tok, .kicma-mobilna i { transition: none; }
+}
+
+/* --------------------------------------------------------------- 22. PRINT */
+
+@media print {
+  .zaglavlje, .fioka, .kicma, .kicma-mobilna, .para-polje, .skip { display: none !important; }
+  body { background: #fff; color: #111; }
+  h1, h2, h3, h4 { color: #000; }
+  .traka { padding-block: 24px; }
+}

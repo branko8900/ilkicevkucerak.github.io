@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ilkićev kućerak u Sremu · Vrdnik, Fruška gora</title>
+<meta name="description" content="Imanje u Vrdniku na Fruškoj gori: apartmani, privatni grejani bazen, podrum i pedeset mesta za stolom.">
+<link rel="icon" href="assets/grb.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="sr-Latn-RS" href="sr/index.html">
+<link rel="alternate" hreflang="en" href="en/index.html">
+<link rel="alternate" hreflang="de" href="de/index.html">
+<link rel="alternate" hreflang="x-default" href="sr/index.html">
+<style>
+html{background:#0E1512;color:#A3B3A8;font-family:system-ui,sans-serif}
+body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:24px;text-align:center}
+a{color:#C8A15A;font-size:18px;text-decoration:none;padding:14px 22px;border:1px solid #26362F;border-radius:6px;display:inline-block;margin:6px}
+a:hover{border-color:#C8A15A}
+h1{font-weight:400;letter-spacing:-.02em;color:#F2EFE6}
+</style>
+<script>
+(function(){
+  var m={sr:'sr',en:'en',de:'de'};
+  var s=null;
+  try{s=localStorage.getItem('kucerak:jezik');}catch(e){}
+  if(!s){
+    var n=(navigator.languages||[navigator.language||'sr']).join(',').toLowerCase();
+    s = /\bde/.test(n)?'de' : (/\b(sr|hr|bs|me)/.test(n)?'sr' : (/\ben/.test(n)?'en':'sr'));
+  }
+  // Over http(s) send people to the directory so the address stays clean;
+  // over file:// the filename is required for the page to open at all.
+  var web = location.protocol.indexOf('http') === 0;
+  if(s && m[s.slice(0,2)]) location.replace(m[s.slice(0,2)] + (web ? '/' : '/index.html'));
+})();
+</script>
+</head>
+<body>
+<div>
+<h1>Ilkićev kućerak u Sremu</h1>
+<p>Vrdnik · Fruška gora</p>
+<p><a href="sr/index.html">Srpski</a><a href="en/index.html">English</a><a href="de/index.html">Deutsch</a></p>
+</div>
+</body>
+</html>
